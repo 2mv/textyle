@@ -1,4 +1,4 @@
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
 import { ensureEnvPresence } from './util';
 
 const S3 = new S3Client();
@@ -12,7 +12,7 @@ const IMAGES_BUCKET = ensureEnvPresence( 'IMAGES_BUCKET' );
  * @param timestamp - The point in time to generate key for (in unix epoch format)
  * @returns S3 key for image storage
  */
-export const teletextImageStorageKey = ( pageNr : number, subpageNr : number, timestamp: number ) => {
+export const teletextImageStorageKey = ( pageNr : number, subpageNr : number, timestamp: number ) : string => {
     const targetDirectoryName = `${pageNr}/${subpageNr}`;
     return `${targetDirectoryName}/${timestamp}.png`;
 };
@@ -23,7 +23,7 @@ export const teletextImageStorageKey = ( pageNr : number, subpageNr : number, ti
  * @param pageNr - The page number to generate key for
  * @returns S3 key for last change timestamp object
  */
-const lastTimestampFileName = ( pageNr : number ) => {
+const lastTimestampFileName = ( pageNr : number ) : string => {
     return `${pageNr}/${LAST_TIMESTAMP_KEY}`;
 }
 
@@ -36,7 +36,7 @@ const lastTimestampFileName = ( pageNr : number ) => {
  * @param imageData - The actual image data as a Buffer object
  * @returns a promise that resolves when the S3 write is done or fails
  */
-export const storeTeletextImage = async ( pageNr : number, subpageNr : number, timestamp: number, imageData : Buffer ) => {
+export const storeTeletextImage = async ( pageNr : number, subpageNr : number, timestamp: number, imageData : Buffer ) : Promise<PutObjectCommandOutput> => {
     const imageFileName = teletextImageStorageKey( pageNr, subpageNr, timestamp );
     const writeImageCommand = new PutObjectCommand({
         Bucket: IMAGES_BUCKET,
@@ -53,7 +53,7 @@ export const storeTeletextImage = async ( pageNr : number, subpageNr : number, t
  * @param timestamp - The timestamp of the page edit in unix epoch format
  * @returns a promise that resolves when the S3 write is done or fails
  */
-export const storeLastTimestamp = async ( pageNr : number, timestamp : number ) => {
+export const storeLastTimestamp = async ( pageNr : number, timestamp : number ) : Promise<PutObjectCommandOutput> => {
     const writeLastTimestampCommand = new PutObjectCommand({
         Bucket: IMAGES_BUCKET,
         Key: lastTimestampFileName( pageNr ),
@@ -68,7 +68,7 @@ export const storeLastTimestamp = async ( pageNr : number, timestamp : number ) 
  * @returns the unix epoch timestamp of the last stored edit of the specified 
  * page or `undefined` if unknown.
  */
-export const findLastStoredTimestamp = async ( pageNr : number ) => {
+export const findLastStoredTimestamp = async ( pageNr : number ) : Promise<number | undefined> => {
     const getLastTimestampCommand = new GetObjectCommand({
         Bucket: IMAGES_BUCKET,
         Key: lastTimestampFileName( pageNr )
@@ -98,7 +98,7 @@ export const findLastStoredTimestamp = async ( pageNr : number ) => {
  * @param subpageNr - The subpage number to find the timestamps for
  * @returns Available unix epoch timestamps for the specified page+subpage
  */
-export const fetchAvailableTimestamps = async ( pageNr : number, subpageNr : number ) => {
+export const fetchAvailableTimestamps = async ( pageNr : number, subpageNr : number ) : Promise<number[]> => {
     const listAvailableImagesCommand = new ListObjectsV2Command({
         Bucket: IMAGES_BUCKET,
         Prefix: `${pageNr}/${subpageNr}`

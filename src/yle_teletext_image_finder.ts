@@ -14,7 +14,7 @@ const IMAGES_BUCKET_HOSTNAME = ensureEnvPresence('IMAGES_BUCKET_HOSTNAME');
  * @param targetTimestamp - The point in time to find image URL for
  * @returns a URL string, or `undefined` if specified page or point in time not found
  */
-export const resolveTeletextPageImageUrlAt = async ( pageNr : number, subpageNr : number, targetTimestamp : number ) => {
+export const resolveTeletextPageImageUrlAt = async ( pageNr : number, subpageNr : number, targetTimestamp : number ) : Promise<string | undefined> => {
     const availableTimestamps = await fetchAvailableTimestamps( pageNr, subpageNr );
     availableTimestamps.sort( ( a, b ) => b - a );
 

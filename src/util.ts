@@ -7,7 +7,7 @@
  * @param varName - The environment variable's name
  * @returns the environment variable's value
  */
-export const ensureEnvPresence = ( varName : string ) => {
+export const ensureEnvPresence = ( varName : string ) : string => {
     const envVarValue = process.env[varName];
     if ( !envVarValue ) {
         throw new Error(`${envVarValue} environment variable missing!`);

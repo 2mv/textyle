@@ -12,7 +12,7 @@ const START_AT_PAGE = 100;
  * @param lastSubpage - number of subpages to store
  * @returns a promise that resolves when all subpage images are stored or failed
  */
-const storeTeletextImagesIfNewer = async ( pageNr : number, timestamp : number, lastSubpage : number ) => {
+const storeTeletextImagesIfNewer = async ( pageNr : number, timestamp : number, lastSubpage : number ) : Promise<any> => {
     const lastStoredAt = await findLastStoredTimestamp( pageNr );
     const storePromises : Promise<any>[] = [];
     if ( !lastStoredAt || timestamp > lastStoredAt ) {

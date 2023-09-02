@@ -8,7 +8,7 @@ import { APIGatewayEvent, Context } from 'aws-lambda';
  * Stores the PNG images of all pages that have changed since last run.
  * Currently uses S3 for file storage.
  */
-export const teletextImagesFetch = async () => {
+export const teletextImagesFetch = async () : Promise<any> => {
   return findAndStoreNewTeletextImages();
 };
 
@@ -17,6 +17,6 @@ export const teletextImagesFetch = async () => {
  * specified point in time and redirects to that URL. Responds to API Gateway
  * events.
  */
-export const getTeletextImageAt = async( event : APIGatewayEvent, context : Context ) => {
+export const getTeletextImageAt = async( event : APIGatewayEvent, context : Context ) : Promise<any> => {
   return await httpApi.run( event, context );
 };
