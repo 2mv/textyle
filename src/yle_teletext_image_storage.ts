@@ -4,6 +4,7 @@ import { ensureEnvPresence } from './util';
 const S3 = new S3Client();
 const LAST_TIMESTAMP_KEY = "LAST_TS";
 const IMAGES_BUCKET = ensureEnvPresence( 'IMAGES_BUCKET' );
+const IMAGES_BUCKET_HOSTNAME = ensureEnvPresence('IMAGES_BUCKET_HOSTNAME');
 
 /**
  * Generates S3 key for the specified teletext page+subpage at given point in time.
@@ -113,4 +114,9 @@ export const fetchAvailableTimestamps = async ( pageNr : number, subpageNr : num
 
     const filenames = response.Contents.map( (obj) => { return obj.Key?.split('/').pop() } );
     return filenames.map( (filename) => { return parseInt( filename?.split('.')[0] || '' ) } );
+};
+
+export const imagePublicUrl = ( pageNr : number, subpageNr : number, timestamp : number ) => {
+    const filename = teletextImageStorageKey( pageNr, subpageNr, timestamp );
+    return `https://${IMAGES_BUCKET_HOSTNAME}/${filename}`;
 };

@@ -1,7 +1,4 @@
-import { ensureEnvPresence } from './util';
-import { fetchAvailableTimestamps, teletextImageStorageKey } from "./yle_teletext_image_storage";
-
-const IMAGES_BUCKET_HOSTNAME = ensureEnvPresence('IMAGES_BUCKET_HOSTNAME');
+import { fetchAvailableTimestamps, imagePublicUrl } from "./yle_teletext_image_storage";
 
 /**
  * Finds the PNG image file URL of the requested page from S3. The target 
@@ -23,6 +20,5 @@ export const resolveTeletextPageImageUrlAt = async ( pageNr : number, subpageNr 
         return;
     }
 
-    const filename = teletextImageStorageKey( pageNr, subpageNr, timestampToFetch );
-    return `https://${IMAGES_BUCKET_HOSTNAME}/${filename}`;
+    return imagePublicUrl( pageNr, subpageNr, timestampToFetch );
 };
