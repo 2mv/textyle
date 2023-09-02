@@ -6,3 +6,5 @@ for showing a teletext page in any given point in time, as long as the image
 has been stored.
 
 Deploy to AWS using [Serverless Framework](https://www.serverless.com/).
+
+Uses [esbuild](https://esbuild.github.io/) for bundling.
