@@ -10,7 +10,7 @@
 export const ensureEnvPresence = ( varName : string ) : string => {
     const envVarValue = process.env[varName];
     if ( !envVarValue ) {
-        throw new Error(`${envVarValue} environment variable missing!`);
+        throw new Error(`'${varName}' environment variable missing!`);
     }
     return envVarValue;
 };
