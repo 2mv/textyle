@@ -1,12 +1,15 @@
 import get, { AxiosResponse } from 'axios';
 import { URL } from 'node:url';
 import { ensureEnvPresence } from './util';
+import { Agent as HttpsAgent } from 'node:https';
 
 const YLE_TELETEXT_API_ORIGIN = 'https://external.api.yle.fi';
 const YLE_TELETEXT_API_ROOT_PATH = '/v1/teletext';
 
 const YLE_API_APP_ID = ensureEnvPresence( 'YLE_API_APP_ID' );
 const YLE_API_APP_KEY = ensureEnvPresence( 'YLE_API_APP_KEY' );
+
+const httpsAgent = new HttpsAgent({ keepAlive: true });
 
 /**
  * Class for any Yle API URLs that require using an app ID and app key.
@@ -102,7 +105,7 @@ const pageImageUrl = ( pageNr : number, subpageNr : number ) : YleTeletextAPIURL
 export const pageData = async ( pageNr: number ) : Promise<AxiosResponse> => {
   const url = pageDataJsonUrl( pageNr );
   try {
-    return await get( url.href );
+    return await get( url.href, { httpsAgent: httpsAgent } );
   } catch ( axiosError : any ) {
     const httpStatus = axiosError?.response?.status
     if ( httpStatus == 404 ) {
@@ -125,7 +128,7 @@ export const pageData = async ( pageNr: number ) : Promise<AxiosResponse> => {
 export const pageImage = async ( pageNr: number, subpageNr : number ) : Promise<AxiosResponse> => {
   const url =pageImageUrl( pageNr, subpageNr );
   try {
-    return await get( url.href, { responseType: 'arraybuffer' } );
+    return await get( url.href, { responseType: 'arraybuffer', httpsAgent: httpsAgent } );
   } catch ( axiosError : any ) {
     const httpStatus = axiosError?.response?.status
     if ( httpStatus == 404 ) {
