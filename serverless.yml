@@ -1,0 +1,75 @@
+service: textyle
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs18.x
+  # arm64 appears to be slightly faster than x86_64
+  architecture: arm64
+  environment:
+    IMAGES_BUCKET: ${self:custom.imagesBucketName}
+    YLE_API_APP_ID: ${self:custom.apiCredentials.yle_app_id}
+    YLE_API_APP_KEY: ${self:custom.apiCredentials.yle_app_key}
+    IMAGES_BUCKET_HOSTNAME: 
+      Fn::GetAtt: [ imagesBucket, DomainName ]
+  iam:
+    role:
+      statements:
+        - Effect: Allow # Allow these lambda functions to list, fetch and store files in the teletext images bucket
+          Action: 
+            - 's3:GetObject'
+            - 's3:PutObject' 
+            - 's3:ListBucket'
+          Resource: 
+            - Fn::Join: [ '/', [ Fn::GetAtt: [ imagesBucket, Arn ], '*' ] ]
+            - Fn::GetAtt: [ imagesBucket, Arn ]
+
+
+custom: # teletext image files are stored in this s3 bucket
+  imagesBucketName: 'textyle-images-${sls:stage}'
+  # credentials for Yle External API are stored in Secrets Manager
+  apiCredentials: ${ssm:/aws/reference/secretsmanager/textyle-${sls:stage}}
+
+plugins: # Use esbuild for compiling typescript and bundling
+  - serverless-esbuild
+
+functions:
+  teletextImagesFetch:
+    # Updating all the images takes a lot of time so a longer timeout is needed
+    timeout: 240
+    memorySize: 256
+    handler: src/functions.teletextImagesFetch
+    events: # Update all teletext images this often
+      - schedule: rate(20 minutes)
+  getTeletextImageAt:
+    timeout: 5
+    memorySize: 256
+    handler: src/functions.getTeletextImageAt
+    # API endpoint for fetching teletext images at specified points in time
+    url: true
+
+resources:
+  Resources:
+    imagesBucket: # This bucket holds the teletext image files
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.imagesBucketName}
+        PublicAccessBlockConfiguration:
+          BlockPublicPolicy: false
+          BlockPublicAcls: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: false
+    imagesBucketPolicy: # allow public access to image files in order to serve them via the API
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref imagesBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action:
+              - 's3:GetObject'
+              Effect: Allow
+              Resource: 
+                - Fn::Join: [ '/', [ Fn::GetAtt: [ imagesBucket, Arn ], '*.png' ] ]
+              Principal: '*'
