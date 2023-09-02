@@ -33,6 +33,9 @@ const storeTeletextImagesIfNewer = async ( pageNr : number, timestamp : number, 
  * @returns a promise that resolves when all newer subpage images are stored or failed
  */
 export const findAndStoreNewTeletextImages = async ( pageNr : number = START_AT_PAGE ) : Promise<any> => {
+    // FIXME: this is pretty slow. maybe try a fastimage-type approach and
+    // use nodejs builtin HTTP module to fetch only the first few bytes of the
+    // data that contain the required attributes.
     const pageResponse = await pageData( pageNr );
     const pageInfo = pageResponse.data["teletext"]["page"];
     const timestamp = Date.parse( pageInfo["time"] ) / 1000;
