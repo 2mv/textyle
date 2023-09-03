@@ -1,13 +1,11 @@
 import get, { AxiosResponse } from 'axios';
 import { URL } from 'node:url';
-import { TESTING, ensureEnvPresence } from './util';
+import { TESTING } from './util';
 import { Agent as HttpsAgent } from 'node:https';
+import { YLE_API_APP_ID, YLE_API_APP_KEY } from './credentials';
 
 const YLE_TELETEXT_API_ORIGIN = 'https://external.api.yle.fi';
 const YLE_TELETEXT_API_ROOT_PATH = '/v1/teletext';
-
-const YLE_API_APP_ID = ensureEnvPresence( 'YLE_API_APP_ID' );
-const YLE_API_APP_KEY = ensureEnvPresence( 'YLE_API_APP_KEY' );
 
 const httpsAgent = new HttpsAgent({ keepAlive: true });
 

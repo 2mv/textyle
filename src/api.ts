@@ -1,6 +1,7 @@
 import createAPI, { API, Request, Response } from 'lambda-api';
 
 import { resolveTeletextPageImageUrlAt } from './yle_teletext_image_finder';
+import { YLE_API_APP_ID, YLE_API_APP_KEY } from './credentials';
 
 /**
  * Lambda API root
@@ -19,6 +20,11 @@ httpApi.get( '/:pageNr/:subpageFilename', async ( request : Request, response : 
   const pageNr = parseInt( request.params['pageNr'] || '' );
   const subpageNr = parseInt( request.params['subpageFilename'] || '' );
   const timestamp = parseInt( request.query['time'] || '' );
+  const appId = request.query['app_id'] || '';
+  const appKey = request.query['app_key'] || '';
+  if ( appId !== YLE_API_APP_ID || appKey !== YLE_API_APP_KEY ) {
+    return response.status( 401 ).send( undefined );
+  }
   if ( !pageNr || !subpageNr || !timestamp ) {
     return response.status( 404 ).send( undefined );
   }
