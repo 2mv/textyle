@@ -1,5 +1,5 @@
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
-import { ensureEnvPresence } from './util';
+import { GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, PutObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
+import { TESTING, ensureEnvPresence } from './util';
 
 const S3 = new S3Client();
 const LAST_TIMESTAMP_KEY = "LAST_TS";
@@ -86,7 +86,7 @@ export const findLastStoredTimestamp = async ( pageNr : number ) : Promise<numbe
         }
         return parseInt( lastTimestamp );
     } catch ( s3Error : any ) {
-        if ( s3Error.name === 'NoSuchKey' ) {
+        if ( s3Error instanceof NoSuchKey && s3Error.name === 'NoSuchKey' ) {
             return;
         }
         throw( s3Error );
@@ -120,3 +120,7 @@ export const imagePublicUrl = ( pageNr : number, subpageNr : number, timestamp :
     const filename = teletextImageStorageKey( pageNr, subpageNr, timestamp );
     return `https://${IMAGES_BUCKET_HOSTNAME}/${filename}`;
 };
+
+export const testing = TESTING ? {
+    lastTimestampFileName: lastTimestampFileName
+} : undefined;
