@@ -1,7 +1,7 @@
 import mockAxios from 'jest-mock-axios';
 
 import { ensurePresence } from './util';
-import { testing as maybeTesting, pageData } from './yle_teletext_client';
+import { testing as maybeTesting, pageData, pageImage } from './yle_teletext_client';
 import { afterEach, expect, test } from '@jest/globals';
 
 const testing = ensurePresence( maybeTesting );
@@ -111,6 +111,57 @@ test('page data fetching throws on 500', async () => {
 
 test('page data fetching rethrows on other errors', async () => {
     const promise = pageData( 100 );
+    const err = new Error("something else");
+    mockAxios.mockError( err );
+
+    let raised = false;
+    try {
+        await promise;
+    } catch ( err2 ) {
+        raised = true;
+        expect(err2).toBe(err);
+    }
+    expect(raised).toEqual(true);
+});
+
+test('page image fetching works', async () => {
+    const promise = pageImage( 100, 1 );
+    mockAxios.mockResponse({ data: "foo" });
+
+    const result = await promise;
+    expect(result.data).toEqual("foo")
+});
+
+test('page image fetching throws on 404', async () => {
+    const promise = pageImage( 100, 1 );
+    mockAxios.mockError( { response: { status: 404 } } );
+
+    let raised = false;
+    try {
+        await promise;
+    } catch ( err ) {
+        raised = true;
+        expect(err).toBeInstanceOf(testing.TeletextPageNotFoundError);
+    }
+    expect(raised).toEqual(true);
+});
+
+test('page image fetching throws on 500', async () => {
+    const promise = pageImage( 100, 1 );
+    mockAxios.mockError( { response: { status: 500 } } );
+
+    let raised = false;
+    try {
+        await promise;
+    } catch ( err ) {
+        raised = true;
+        expect(err).toBeInstanceOf(testing.TeletextPageAPIError);
+    }
+    expect(raised).toEqual(true);
+});
+
+test('page image fetching rethrows on other errors', async () => {
+    const promise = pageImage( 100, 1 );
     const err = new Error("something else");
     mockAxios.mockError( err );
 

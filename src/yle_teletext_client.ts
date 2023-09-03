@@ -131,13 +131,14 @@ export const pageImage = async ( pageNr: number, subpageNr : number ) : Promise<
     return await get( url.href, { responseType: 'arraybuffer', httpsAgent: httpsAgent } );
   } catch ( axiosError : any ) {
     const httpStatus = axiosError?.response?.status
+    if ( !httpStatus ) {
+      throw( axiosError );
+    }
+
     if ( httpStatus == 404 ) {
       throw new TeletextPageNotFoundError( `Teletext page ${pageNr}, subpage ${subpageNr}, was not found`, url, pageNr, subpageNr );
     }
-    if ( httpStatus !== 200 ) {
-      throw new TeletextPageAPIError( `Teletext page ${pageNr}, subpage ${subpageNr}, request failed with HTTP status '${httpStatus}'`, url, pageNr, subpageNr );
-    }
-    throw new TeletextPageAPIError( `Teletext page ${pageNr}, subpage ${subpageNr}, request failed without any HTTP status. URL was: ${url}`, url, pageNr, subpageNr );
+    throw new TeletextPageAPIError( `Teletext page ${pageNr}, subpage ${subpageNr}, request failed with HTTP status '${httpStatus}'`, url, pageNr, subpageNr );
   }
 };
 
