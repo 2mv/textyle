@@ -1,3 +1,4 @@
+import { TESTING } from './util';
 import { pageData, pageImage } from './yle_teletext_client'
 import { findLastStoredTimestamp, storeLastTimestamp, storeTeletextImage } from './yle_teletext_image_storage';
 
@@ -48,3 +49,7 @@ export const findAndStoreNewTeletextImages = async ( pageNr : number = START_AT_
     }
     return Promise.all( [ storePromises, findAndStoreNewTeletextImages( nextPageNr ) ] );
 };
+
+export const testing = TESTING ? {
+    storeTeletextImagesIfNewer: storeTeletextImagesIfNewer
+} : undefined;
