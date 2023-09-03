@@ -1,5 +1,5 @@
 import { ensureEnvPresence } from './util';
-import {expect, test} from '@jest/globals';
+import { expect, test } from '@jest/globals';
 
 test('returns environment variable value when present', () => {
     process.env['JESTTEST'] = "foo";

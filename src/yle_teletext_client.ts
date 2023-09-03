@@ -1,6 +1,6 @@
 import get, { AxiosResponse } from 'axios';
 import { URL } from 'node:url';
-import { ensureEnvPresence } from './util';
+import { TESTING, ensureEnvPresence } from './util';
 import { Agent as HttpsAgent } from 'node:https';
 
 const YLE_TELETEXT_API_ORIGIN = 'https://external.api.yle.fi';
@@ -108,14 +108,14 @@ export const pageData = async ( pageNr: number ) : Promise<AxiosResponse> => {
     return await get( url.href, { httpsAgent: httpsAgent } );
   } catch ( axiosError : any ) {
     const httpStatus = axiosError?.response?.status
+    if ( !httpStatus ) {
+      throw( axiosError );
+    }
+
     if ( httpStatus == 404 ) {
       throw new TeletextPageNotFoundError( `Teletext page ${pageNr} was not found`, url, pageNr );
     }
-    if ( httpStatus !== 200 ) {
-      throw new TeletextPageAPIError( `Teletext page ${pageNr} request failed with HTTP status '${httpStatus}'`, url, pageNr );
-    }
-
-    throw new TeletextPageAPIError( `Teletext page ${pageNr} request failed without any HTTP status. URL was: ${url}`, url, pageNr );
+    throw new TeletextPageAPIError( `Teletext page ${pageNr} request failed with HTTP status '${httpStatus}'`, url, pageNr );
   }
 };
 
@@ -140,3 +140,13 @@ export const pageImage = async ( pageNr: number, subpageNr : number ) : Promise<
     throw new TeletextPageAPIError( `Teletext page ${pageNr}, subpage ${subpageNr}, request failed without any HTTP status. URL was: ${url}`, url, pageNr, subpageNr );
   }
 };
+
+export const testing = TESTING ? {
+  pageImageUrl: pageImageUrl,
+  YleAPIURL: YleAPIURL,
+  YleTeletextAPIURL: YleTeletextAPIURL,
+  YleAPIError: YleAPIError,
+  TeletextPageAPIError: TeletextPageAPIError,
+  TeletextPageNotFoundError: TeletextPageNotFoundError,
+  pageDataJsonUrl: pageDataJsonUrl
+} : undefined;
